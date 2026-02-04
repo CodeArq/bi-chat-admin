@@ -1,0 +1,18 @@
+{
+  "description": "Example .claude/settings.json configuration for chat-pilot hooks (multi-session)",
+  "note": "Merge this with your existing settings.json to enable chat bridge",
+  "note2": "The hook uses $CLAUDE_SESSION_ID (auto-set) to identify which session it's running in",
+
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npx tsx \"$CLAUDE_PROJECT_DIR/apps/chat-pilot/hooks/chat-bridge.ts\""
+          }
+        ]
+      }
+    ]
+  }
+}

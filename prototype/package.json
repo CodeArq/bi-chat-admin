@@ -1,0 +1,16 @@
+{
+  "name": "sdk-prototype",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "test:bash": "npx tsx sdk-bash-test.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/claude-code": "^1.0.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.7.0",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}

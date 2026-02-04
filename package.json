@@ -1,0 +1,15 @@
+{
+  "name": "chat-pilot",
+  "version": "0.1.0",
+  "private": true,
+  "description": "B-Intelligent V1 Chat Pilot - Web UI to Local Claude Bridge",
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspaces --if-present",
+    "dev:web": "npm run dev -w @chat-pilot/web",
+    "dev:bridge": "npm run dev -w @chat-pilot/bridge",
+    "build": "npm run build --workspaces --if-present"
+  }
+}
