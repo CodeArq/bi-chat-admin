@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react'
 import { useAuth } from './context/AuthContext'
+import { useBridge } from './context/BridgeContext'
 import { useUnifiedSessions, UnifiedSession, SessionUsage } from './hooks/useUnifiedSessions'
 import { useWebSocket } from './hooks/useWebSocket'
 import { useWebChats } from './hooks/useWebChats'
@@ -9,6 +10,12 @@ import { ViewModeToggle } from './components/ViewModeToggle'
 import { MessageInput } from './components/MessageInput'
 import { LoginPage } from './components/LoginPage'
 import type { ViewMode, TranscriptEntry, TranscriptEntryType, ApprovalRequest, ProcessState, PermissionMode, Attachment } from './types'
+
+interface FolderInfo {
+  name: string
+  path: string
+  modifiedAt: string
+}
 
 type ActiveView =
   | { type: 'dashboard' }
@@ -46,6 +53,7 @@ function App() {
 }
 
 function AuthenticatedApp({ clientName, defaultCwd, onSignOut }: { clientName: string; defaultCwd: string | null; onSignOut: () => void }) {
+  const { fetchWithAuth } = useBridge()
   const [activeView, setActiveView] = useState<ActiveView>({ type: 'dashboard' })
   const [initialLoadDone, setInitialLoadDone] = useState(false)
   const [viewMode, setViewMode] = useState<ViewMode>('detailed')
@@ -73,8 +81,36 @@ function AuthenticatedApp({ clientName, defaultCwd, onSignOut }: { clientName: s
   const [errorNotification, setErrorNotification] = useState<string | null>(null)
   // New session modal
   const [showNewSessionModal, setShowNewSessionModal] = useState(false)
+  const [modalStep, setModalStep] = useState<'folder' | 'mode'>('folder')
+  const [folders, setFolders] = useState<FolderInfo[]>([])
+  const [selectedFolder, setSelectedFolder] = useState<string | null>(null)
+  const [foldersLoading, setFoldersLoading] = useState(false)
   // Auto-approve toggle
   const [autoApprove, setAutoApprove] = useState(false)
+
+  // Fetch folders when modal opens
+  const fetchFolders = useCallback(async () => {
+    setFoldersLoading(true)
+    try {
+      const response = await fetchWithAuth('/folders')
+      if (response.ok) {
+        const data = await response.json()
+        setFolders(data.folders || [])
+      }
+    } catch (err) {
+      console.error('[App] Failed to fetch folders:', err)
+    } finally {
+      setFoldersLoading(false)
+    }
+  }, [fetchWithAuth])
+
+  // Open new session modal
+  const openNewSessionModal = useCallback(() => {
+    setShowNewSessionModal(true)
+    setModalStep('folder')
+    setSelectedFolder(null)
+    fetchFolders()
+  }, [fetchFolders])
 
   const {
     sessions,
@@ -325,9 +361,10 @@ function AuthenticatedApp({ clientName, defaultCwd, onSignOut }: { clientName: s
   // Create new web session (streaming with approval support)
   const handleCreateSession = async (permissionMode: PermissionMode) => {
     setShowNewSessionModal(false)
-    // Use client's default_cwd from Supabase, fallback to env var for backwards compatibility
-    const cwd = defaultCwd || import.meta.env.VITE_DEFAULT_CWD || '/tmp'
-    const chat = await createWebChat(cwd, 'New Session', undefined, permissionMode)
+    // Use selected folder, then client's default_cwd, then fallback
+    const cwd = selectedFolder || defaultCwd || import.meta.env.VITE_DEFAULT_CWD || '/tmp'
+    const folderName = selectedFolder ? selectedFolder.split('/').pop() : 'New Session'
+    const chat = await createWebChat(cwd, folderName || 'New Session', undefined, permissionMode)
     if (chat) {
       setIsV2Mode(true)
       setV2ChatId(chat.id)
@@ -336,6 +373,9 @@ function AuthenticatedApp({ clientName, defaultCwd, onSignOut }: { clientName: s
       setRespondedApprovals(new Map())
       setActiveView({ type: 'session', sessionId: chat.id, cwd })
     }
+    // Reset modal state
+    setModalStep('folder')
+    setSelectedFolder(null)
   }
 
   const handleSetLabel = async (sessionId: string, label: string) => {
@@ -492,7 +532,7 @@ function AuthenticatedApp({ clientName, defaultCwd, onSignOut }: { clientName: s
         <div className="session-list">
           <div className="session-list-header">
             <span>ALL SESSIONS ({sessions.length})</span>
-            <button className="create-session-btn" onClick={() => setShowNewSessionModal(true)}>
+            <button className="create-session-btn" onClick={openNewSessionModal}>
               + New Session
             </button>
           </div>
@@ -612,26 +652,68 @@ function AuthenticatedApp({ clientName, defaultCwd, onSignOut }: { clientName: s
       {showNewSessionModal && (
         <div className="modal-overlay" onClick={() => setShowNewSessionModal(false)}>
           <div className="new-session-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="new-session-modal-header">
-              <span className="modal-prompt">&gt;</span>
-              <span className="modal-title">SELECT MODE</span>
-            </div>
-            <div className="new-session-modal-options">
-              <button
-                className="session-mode-btn assisted"
-                onClick={() => handleCreateSession('assisted')}
-              >
-                <div className="mode-icon">ASSISTED</div>
-                <div className="mode-description">Human-in-the-loop — approve tool usage</div>
-              </button>
-              <button
-                className="session-mode-btn full-ai"
-                onClick={() => handleCreateSession('full_ai')}
-              >
-                <div className="mode-icon">FULL AI</div>
-                <div className="mode-description">Autonomous — skip all permission prompts</div>
-              </button>
-            </div>
+            {modalStep === 'folder' ? (
+              <>
+                <div className="new-session-modal-header">
+                  <span className="modal-prompt">&gt;</span>
+                  <span className="modal-title">SELECT FOLDER</span>
+                </div>
+                <div className="folder-list">
+                  {foldersLoading ? (
+                    <div className="folders-loading">Loading folders...</div>
+                  ) : folders.length === 0 ? (
+                    <div className="folders-empty">No folders found on Desktop</div>
+                  ) : (
+                    folders.map((folder) => (
+                      <button
+                        key={folder.path}
+                        className={`folder-item ${selectedFolder === folder.path ? 'selected' : ''}`}
+                        onClick={() => setSelectedFolder(folder.path)}
+                      >
+                        <span className="folder-icon">📁</span>
+                        <span className="folder-name">{folder.name}</span>
+                      </button>
+                    ))
+                  )}
+                </div>
+                <div className="modal-actions">
+                  <button
+                    className="modal-next-btn"
+                    disabled={!selectedFolder}
+                    onClick={() => setModalStep('mode')}
+                  >
+                    NEXT →
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="new-session-modal-header">
+                  <span className="modal-prompt">&gt;</span>
+                  <span className="modal-title">SELECT MODE</span>
+                  <span className="selected-folder-badge">{selectedFolder?.split('/').pop()}</span>
+                </div>
+                <div className="new-session-modal-options">
+                  <button
+                    className="session-mode-btn assisted"
+                    onClick={() => handleCreateSession('assisted')}
+                  >
+                    <div className="mode-icon">ASSISTED</div>
+                    <div className="mode-description">Human-in-the-loop — approve tool usage</div>
+                  </button>
+                  <button
+                    className="session-mode-btn full-ai"
+                    onClick={() => handleCreateSession('full_ai')}
+                  >
+                    <div className="mode-icon">FULL AI</div>
+                    <div className="mode-description">Autonomous — skip all permission prompts</div>
+                  </button>
+                </div>
+                <button className="modal-back-btn" onClick={() => setModalStep('folder')}>
+                  ← BACK
+                </button>
+              </>
+            )}
             <button className="modal-dismiss" onClick={() => setShowNewSessionModal(false)}>
               ESC
             </button>

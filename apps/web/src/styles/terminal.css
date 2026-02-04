@@ -3431,6 +3431,123 @@ body {
   color: #666;
 }
 
+/* Folder Selection */
+.folder-list {
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  gap: 4px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.folders-loading,
+.folders-empty {
+  padding: 20px;
+  text-align: center;
+  color: #556;
+  font-size: 11px;
+}
+
+.folder-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: transparent;
+  border: 1px solid #1a1f28;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+  width: 100%;
+  font-family: var(--font-mono);
+}
+
+.folder-item:hover {
+  background: rgba(0, 255, 65, 0.04);
+  border-color: rgba(0, 255, 65, 0.2);
+}
+
+.folder-item.selected {
+  background: rgba(0, 255, 65, 0.08);
+  border-color: var(--terminal-fg);
+  box-shadow: 0 0 12px rgba(0, 255, 65, 0.1);
+}
+
+.folder-icon {
+  font-size: 14px;
+}
+
+.folder-name {
+  font-size: 12px;
+  color: var(--terminal-fg-dim);
+}
+
+.folder-item.selected .folder-name {
+  color: var(--terminal-fg);
+}
+
+.modal-actions {
+  padding: 12px;
+  border-top: 1px solid #1a1f28;
+}
+
+.modal-next-btn {
+  width: 100%;
+  padding: 10px 16px;
+  background: rgba(0, 255, 65, 0.1);
+  border: 1px solid rgba(0, 255, 65, 0.3);
+  border-radius: 3px;
+  color: var(--terminal-fg);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.modal-next-btn:hover:not(:disabled) {
+  background: rgba(0, 255, 65, 0.15);
+  border-color: var(--terminal-fg);
+}
+
+.modal-next-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.modal-back-btn {
+  background: transparent;
+  border: 1px solid #1a1f28;
+  color: #556;
+  padding: 8px 14px;
+  margin: 0 12px 12px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.modal-back-btn:hover {
+  border-color: #3a3f4a;
+  color: #888;
+}
+
+.selected-folder-badge {
+  margin-left: auto;
+  padding: 2px 8px;
+  background: rgba(0, 255, 65, 0.1);
+  border: 1px solid rgba(0, 255, 65, 0.2);
+  border-radius: 2px;
+  font-size: 9px;
+  color: var(--terminal-fg-dim);
+}
+
 /* ============================================================================
    Login Page
    ============================================================================ */

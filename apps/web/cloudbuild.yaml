@@ -11,16 +11,11 @@ steps:
       - '--build-arg=VITE_SUPABASE_URL=${_SUPABASE_URL}'
       - '--build-arg=VITE_SUPABASE_ANON_KEY=${_SUPABASE_ANON_KEY}'
       - '-t'
-      - 'gcr.io/$PROJECT_ID/bi-chat-admin:$COMMIT_SHA'
-      - '-t'
       - 'gcr.io/$PROJECT_ID/bi-chat-admin:latest'
       - '.'
     dir: 'apps/web'
 
   # Push to Container Registry
-  - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'gcr.io/$PROJECT_ID/bi-chat-admin:$COMMIT_SHA']
-
   - name: 'gcr.io/cloud-builders/docker'
     args: ['push', 'gcr.io/$PROJECT_ID/bi-chat-admin:latest']
 
@@ -31,7 +26,7 @@ steps:
       - 'run'
       - 'deploy'
       - 'bi-chat-admin'
-      - '--image=gcr.io/$PROJECT_ID/bi-chat-admin:$COMMIT_SHA'
+      - '--image=gcr.io/$PROJECT_ID/bi-chat-admin:latest'
       - '--region=${_REGION}'
       - '--platform=managed'
       - '--allow-unauthenticated'
@@ -47,8 +42,7 @@ substitutions:
   _SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJibmRpb2FleG5pdHVia2twYW9jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4NDQ5NzQsImV4cCI6MjA4NTQyMDk3NH0.9iHLmQLlqmXSrLI68j1237XoM-BF6FbvagLzp4a7CcE
 
 images:
-  - 'gcr.io/$PROJECT_ID/bi-chat-admin:$COMMIT_SHA'
   - 'gcr.io/$PROJECT_ID/bi-chat-admin:latest'
 
 options:
-  logging: CLOUD_LOGGING_ONLY
+  logging: GCS_ONLY

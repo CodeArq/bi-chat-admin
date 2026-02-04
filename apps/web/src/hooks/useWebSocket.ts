@@ -38,7 +38,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
       clientRef.current.disconnect()
     }
 
-    const client = new WebSocketClient(wsUrl, apiKey)
+    const client = new WebSocketClient(wsUrl, apiKey || '')
     clientRef.current = client
 
     client.connect().then(() => {
