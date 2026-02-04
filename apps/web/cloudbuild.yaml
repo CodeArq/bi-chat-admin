@@ -1,6 +1,6 @@
 # =============================================================================
-# Cloud Build config for Chat-Pilot Web UI
-# Triggered on push to main (apps/chat-pilot/apps/web/**)
+# Cloud Build config for B-Intelligent Chat Admin
+# Triggered on push to main
 # =============================================================================
 
 steps:
@@ -8,20 +8,21 @@ steps:
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'build'
-      - '--build-arg=VITE_API_URL=${_BRIDGE_URL}'
-      - '--build-arg=VITE_WS_URL=${_BRIDGE_WS_URL}'
+      - '--build-arg=VITE_SUPABASE_URL=${_SUPABASE_URL}'
+      - '--build-arg=VITE_SUPABASE_ANON_KEY=${_SUPABASE_ANON_KEY}'
       - '-t'
-      - 'gcr.io/$PROJECT_ID/chat-pilot-web:$COMMIT_SHA'
+      - 'gcr.io/$PROJECT_ID/bi-chat-admin:$COMMIT_SHA'
       - '-t'
-      - 'gcr.io/$PROJECT_ID/chat-pilot-web:latest'
+      - 'gcr.io/$PROJECT_ID/bi-chat-admin:latest'
       - '.'
+    dir: 'apps/web'
 
   # Push to Container Registry
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'gcr.io/$PROJECT_ID/chat-pilot-web:$COMMIT_SHA']
+    args: ['push', 'gcr.io/$PROJECT_ID/bi-chat-admin:$COMMIT_SHA']
 
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'gcr.io/$PROJECT_ID/chat-pilot-web:latest']
+    args: ['push', 'gcr.io/$PROJECT_ID/bi-chat-admin:latest']
 
   # Deploy to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
@@ -29,8 +30,8 @@ steps:
     args:
       - 'run'
       - 'deploy'
-      - 'chat-pilot-web'
-      - '--image=gcr.io/$PROJECT_ID/chat-pilot-web:$COMMIT_SHA'
+      - 'bi-chat-admin'
+      - '--image=gcr.io/$PROJECT_ID/bi-chat-admin:$COMMIT_SHA'
       - '--region=${_REGION}'
       - '--platform=managed'
       - '--allow-unauthenticated'
@@ -42,12 +43,12 @@ steps:
 
 substitutions:
   _REGION: us-central1
-  _BRIDGE_URL: https://your-vm-ip-or-domain:3001
-  _BRIDGE_WS_URL: wss://your-vm-ip-or-domain:3001/ws
+  _SUPABASE_URL: https://rbndioaexnitubkkpaoc.supabase.co
+  _SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJibmRpb2FleG5pdHVia2twYW9jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4NDQ5NzQsImV4cCI6MjA4NTQyMDk3NH0.9iHLmQLlqmXSrLI68j1237XoM-BF6FbvagLzp4a7CcE
 
 images:
-  - 'gcr.io/$PROJECT_ID/chat-pilot-web:$COMMIT_SHA'
-  - 'gcr.io/$PROJECT_ID/chat-pilot-web:latest'
+  - 'gcr.io/$PROJECT_ID/bi-chat-admin:$COMMIT_SHA'
+  - 'gcr.io/$PROJECT_ID/bi-chat-admin:latest'
 
 options:
   logging: CLOUD_LOGGING_ONLY

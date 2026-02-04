@@ -1,34 +1,29 @@
 # =============================================================================
-# Chat-Pilot Web UI - Cloud Run
+# B-Intelligent Chat Admin - Cloud Run
 # =============================================================================
 
 FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Install pnpm
-RUN npm install -g pnpm
-
 # Copy package files
-COPY package.json pnpm-lock.yaml* ./
+COPY package.json package-lock.json* ./
 
 # Install dependencies
-RUN pnpm install
+RUN npm install
 
 # Copy source
 COPY . .
 
-# Build args - these get baked in at build time
-ARG VITE_API_URL
-ARG VITE_WS_URL
-ARG VITE_BRIDGE_API_KEY
+# Build args - Supabase config baked in at build time
+ARG VITE_SUPABASE_URL
+ARG VITE_SUPABASE_ANON_KEY
 
-ENV VITE_API_URL=$VITE_API_URL
-ENV VITE_WS_URL=$VITE_WS_URL
-ENV VITE_BRIDGE_API_KEY=$VITE_BRIDGE_API_KEY
+ENV VITE_SUPABASE_URL=$VITE_SUPABASE_URL
+ENV VITE_SUPABASE_ANON_KEY=$VITE_SUPABASE_ANON_KEY
 
 # Build
-RUN pnpm build
+RUN npm run build
 
 # =============================================================================
 # Production - nginx
