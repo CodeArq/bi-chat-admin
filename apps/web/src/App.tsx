@@ -487,6 +487,7 @@ function AuthenticatedApp({ clientName, defaultCwd, onSignOut }: { clientName: s
           onApprove={isV2Mode ? handleApprove : undefined}
           onDeny={isV2Mode ? handleDeny : undefined}
           respondedApprovals={respondedApprovals}
+          isProcessing={isV2Mode && processState === 'processing'}
         />
 
         {errorNotification && (

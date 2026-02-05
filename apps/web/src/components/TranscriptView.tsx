@@ -23,6 +23,8 @@ interface TranscriptViewProps {
   onApprove?: (requestId: string, updatedInput?: Record<string, unknown>) => void
   onDeny?: (requestId: string, message?: string) => void
   respondedApprovals?: Map<string, { behavior: 'allow' | 'deny'; selectedAnswer?: string }>
+  // Processing state for typing indicator
+  isProcessing?: boolean
 }
 
 export function TranscriptView({
@@ -39,6 +41,7 @@ export function TranscriptView({
   onApprove,
   onDeny,
   respondedApprovals = new Map(),
+  isProcessing = false,
 }: TranscriptViewProps) {
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -263,6 +266,21 @@ export function TranscriptView({
             return null
         }
       })}
+
+      {/* Typing indicator when Claude is processing */}
+      {isProcessing && (
+        <div className="message-block message-assistant typing-indicator">
+          <div className="message-header">
+            <span className="message-icon">🤖</span>
+            <span className="message-role">Claude</span>
+          </div>
+          <div className="message-content typing-dots">
+            <span className="dot"></span>
+            <span className="dot"></span>
+            <span className="dot"></span>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
