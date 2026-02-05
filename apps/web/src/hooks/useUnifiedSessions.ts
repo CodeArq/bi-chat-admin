@@ -16,6 +16,7 @@ export interface UnifiedSession {
   lastModified: string
   sizeBytes: number
   processInfo?: ProcessInfo
+  username?: string  // Linux user who owns this session
 }
 
 export interface SessionUsage {

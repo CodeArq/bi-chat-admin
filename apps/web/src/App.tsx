@@ -644,7 +644,8 @@ function AuthenticatedApp({ clientName, defaultCwd, onSignOut }: { clientName: s
                       )}
                     </div>
                     <div className="session-project">
-                      {session.cwd.split('/').slice(-2).join('/')}
+                      <span className="session-user">{session.username ? session.username.split('_')[0] : 'unknown'}</span>
+                      <span className="session-folder">{session.projectFolder.replace(/-/g, '/').slice(1).split('/').slice(-2).join('/')}</span>
                     </div>
                     {session.processInfo ? (
                       <div className="session-process-stats">

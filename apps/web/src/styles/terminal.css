@@ -555,7 +555,21 @@ body {
   text-overflow: ellipsis;
   flex-shrink: 1;
   min-width: 100px;
-  max-width: 220px;
+  max-width: 280px;
+  display: flex;
+  gap: 8px;
+}
+
+.session-user {
+  color: #4ecdc4;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.session-folder {
+  color: #5a6a7a;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* ── Meta Right (time + size) ── */
