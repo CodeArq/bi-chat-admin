@@ -279,6 +279,20 @@ function AuthenticatedApp({ clientName, defaultCwd, onSignOut }: { clientName: s
     }
   }, [v2ChatId, respondToApproval])
 
+  // Stop/interrupt a running chat
+  const handleStopChat = useCallback(async (chatId: string) => {
+    console.log('[App] Stopping chat:', chatId)
+    const success = await stopWebChat(chatId)
+    if (success) {
+      setProcessState('idle')
+      setErrorNotification('Chat interrupted')
+      setTimeout(() => setErrorNotification(null), 3000)
+    } else {
+      setErrorNotification('Failed to stop chat — try again')
+      setTimeout(() => setErrorNotification(null), 4000)
+    }
+  }, [stopWebChat])
+
   // Navigation
   const handleBack = () => {
     setActiveView({ type: 'dashboard' })
@@ -452,12 +466,14 @@ function AuthenticatedApp({ clientName, defaultCwd, onSignOut }: { clientName: s
           processState={isV2Mode ? processState : undefined}
           sessionName={sessionDisplayName}
           sessionId={activeView.sessionId.slice(0, 8)}
+          fullSessionId={activeView.sessionId}
           onBack={handleBack}
           isReadOnly={isAgentView}
           isAgent={isAgentView}
           sessionType={isV2Mode ? 'web' : 'terminal'}
           autoApprove={autoApprove}
           onAutoApproveToggle={isV2Mode ? handleAutoApproveToggle : undefined}
+          onStop={isV2Mode && v2ChatId ? () => handleStopChat(v2ChatId) : undefined}
         />
 
         <div className="view-controls">

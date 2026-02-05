@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { DiffViewer } from './DiffViewer'
 
 interface ToolUseProps {
   type: 'use'
@@ -75,6 +76,17 @@ export function ToolBlock(props: ToolBlockProps) {
     const icon = getToolIcon(toolName)
     const displayName = formatToolName(toolName)
 
+    // Check if this is a Write or Edit tool that should show diff view
+    const isWriteTool = toolName === 'Write'
+    const isEditTool = toolName === 'Edit'
+    const showDiff = isWriteTool || isEditTool
+
+    // Extract file info for diff tools
+    const filePath = (input as any)?.file_path || ''
+    const content = (input as any)?.content || ''
+    const oldString = (input as any)?.old_string || ''
+    const newString = (input as any)?.new_string || ''
+
     // Get a summary of the input - ensure all values are strings
     const inputSummary = Object.entries(input || {})
       .slice(0, 2)
@@ -93,11 +105,12 @@ export function ToolBlock(props: ToolBlockProps) {
       .join(', ')
 
     return (
-      <div className={`tool-block tool-use ${isExpanded ? 'expanded' : 'collapsed'}`}>
+      <div className={`tool-block tool-use ${isExpanded ? 'expanded' : 'collapsed'} ${showDiff ? 'has-diff' : ''}`}>
         <div className="tool-header" onClick={() => setIsExpanded(!isExpanded)}>
           <span className="tool-icon">{icon}</span>
           <span className="tool-label-prefix">Tool Use:</span>
           <span className="tool-name">{displayName}</span>
+          {showDiff && <span className="file-path-badge">{filePath.split('/').slice(-2).join('/')}</span>}
           <span className="tool-toggle">{isExpanded ? '▼' : '▶'}</span>
         </div>
         {!isExpanded && inputSummary && (
@@ -105,7 +118,27 @@ export function ToolBlock(props: ToolBlockProps) {
         )}
         {isExpanded && (
           <div className="tool-content">
-            <pre>{JSON.stringify(input, null, 2)}</pre>
+            {showDiff ? (
+              <div className="tool-diff-view">
+                {isWriteTool ? (
+                  // Write tool: show new file content
+                  <DiffViewer
+                    filePath={filePath}
+                    oldString=""
+                    newString={content}
+                  />
+                ) : (
+                  // Edit tool: show old vs new
+                  <DiffViewer
+                    filePath={filePath}
+                    oldString={oldString}
+                    newString={newString}
+                  />
+                )}
+              </div>
+            ) : (
+              <pre>{JSON.stringify(input, null, 2)}</pre>
+            )}
           </div>
         )}
       </div>

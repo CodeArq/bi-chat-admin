@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { ConnectionStatus, ProcessState } from '../types'
 
 interface HeaderProps {
@@ -5,16 +6,28 @@ interface HeaderProps {
   processState?: ProcessState  // Real-time activity state for V2 sessions
   onClear?: () => void
   sessionName?: string
-  sessionId?: string
+  sessionId?: string  // Short ID for display
+  fullSessionId?: string  // Full session ID for copying
   onBack?: () => void
   isReadOnly?: boolean
   isAgent?: boolean
   sessionType?: 'terminal' | 'web'
   autoApprove?: boolean
   onAutoApproveToggle?: (enabled: boolean) => void
+  onStop?: () => void  // Stop/interrupt the current chat
 }
 
-export function Header({ status, processState, onClear, sessionName, sessionId, onBack, isReadOnly, isAgent, sessionType, autoApprove, onAutoApproveToggle }: HeaderProps) {
+export function Header({ status, processState, onClear, sessionName, sessionId, fullSessionId, onBack, isReadOnly, isAgent, sessionType, autoApprove, onAutoApproveToggle, onStop }: HeaderProps) {
+  const [copied, setCopied] = useState(false)
+
+  const copySessionId = () => {
+    const idToCopy = fullSessionId || sessionId
+    if (idToCopy) {
+      navigator.clipboard.writeText(idToCopy)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
+  }
   const statusText: Record<string, string> = {
     connected: 'Connected',
     disconnected: 'Disconnected',
@@ -67,7 +80,14 @@ export function Header({ status, processState, onClear, sessionName, sessionId, 
           {sessionName ? (
             <>
               <span className="session-label">{sessionName}</span>
-              <span className="session-id-label">[{sessionId}]</span>
+              <span
+                className={`session-id-label clickable ${copied ? 'copied' : ''}`}
+                onClick={copySessionId}
+                title={`Click to copy: ${fullSessionId || sessionId}`}
+              >
+                [{fullSessionId || sessionId}]
+                {copied && <span className="copy-toast">Copied!</span>}
+              </span>
             </>
           ) : (
             'B-Intelligent Chat'
@@ -75,6 +95,15 @@ export function Header({ status, processState, onClear, sessionName, sessionId, 
         </div>
       </div>
       <div className="header-right">
+        {onStop && processState === 'processing' && (
+          <button
+            className="stop-button"
+            onClick={onStop}
+            title="Stop/interrupt the current operation (like pressing ESC in terminal)"
+          >
+            ■ STOP
+          </button>
+        )}
         {onAutoApproveToggle && (
           <button
             className={`auto-approve-toggle ${autoApprove ? 'active' : ''}`}

@@ -80,7 +80,52 @@ body {
 
 .session-id-label {
   color: var(--terminal-fg-dim);
+  font-size: 11px;
+  position: relative;
+}
+
+.session-id-label.clickable {
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.session-id-label.clickable:hover {
+  color: var(--terminal-cyan);
+}
+
+.session-id-label.copied {
+  color: var(--terminal-green);
+}
+
+.session-id-label .copy-toast {
+  position: absolute;
+  top: -24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--terminal-green);
+  color: #000;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.stop-button {
+  background: transparent;
+  border: 1px solid var(--terminal-red);
+  color: var(--terminal-red);
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
   font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.stop-button:hover {
+  background: var(--terminal-red);
+  color: #000;
 }
 
 .back-button {
@@ -860,7 +905,10 @@ body {
 
 .message-content {
   word-wrap: break-word;
-  white-space: pre-wrap;
+}
+
+.message-content.markdown-content {
+  white-space: normal;
 }
 
 /* Markdown styles in messages */
@@ -912,6 +960,76 @@ body {
   padding-left: 12px;
   margin: 8px 0;
   color: var(--terminal-fg-dim);
+}
+
+/* Tables in markdown */
+.message-content .table-wrapper {
+  overflow-x: auto;
+  margin: 12px 0;
+}
+
+.message-content table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.message-content table th,
+.message-content table td {
+  border: 1px solid var(--terminal-border);
+  padding: 8px 12px;
+  text-align: left;
+}
+
+.message-content table th {
+  background: rgba(78, 205, 196, 0.15);
+  color: var(--terminal-cyan);
+  font-weight: 600;
+}
+
+.message-content table tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.message-content table tr:hover {
+  background: rgba(78, 205, 196, 0.05);
+}
+
+/* Inline code */
+.message-content .inline-code {
+  background: rgba(0, 255, 0, 0.1);
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 0.9em;
+  font-family: var(--font-mono);
+}
+
+/* Code blocks */
+.message-content .code-block {
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--terminal-border);
+  border-radius: 4px;
+  padding: 12px;
+  overflow-x: auto;
+  margin: 8px 0;
+}
+
+.message-content .code-block code {
+  background: none;
+  padding: 0;
+}
+
+/* Better paragraph spacing */
+.message-content p {
+  margin: 8px 0;
+}
+
+.message-content p:first-child {
+  margin-top: 0;
+}
+
+.message-content p:last-child {
+  margin-bottom: 0;
 }
 
 .message-timestamp {
@@ -1649,6 +1767,28 @@ body {
 
 .tool-block.collapsed .tool-content pre {
   max-height: 80px;
+}
+
+.tool-block.has-diff .tool-content {
+  padding: 0;
+}
+
+.file-path-badge {
+  background: rgba(78, 205, 196, 0.2);
+  color: var(--terminal-cyan);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  margin-left: 8px;
+}
+
+.tool-diff-view {
+  margin: 0;
+}
+
+.tool-diff-view .diff-viewer {
+  border-radius: 0;
+  border: none;
 }
 
 /* ============================================================================
