@@ -616,11 +616,10 @@ function AuthenticatedApp({ clientName, defaultCwd, onSignOut }: { clientName: s
                         {isWeb ? 'WEB' : 'TERM'}
                       </span>
                       {isWeb && isRunning && (
-                        <span className={`session-state-badge ${state || 'idle'}`}>
+                        <span className={`session-state-badge ${state === 'idle' || !state ? 'done' : state}`}>
                           {state === 'processing' ? 'WORKING' :
                            state === 'awaiting_approval' ? 'APPROVAL' :
-                           state === 'error' ? 'ERROR' :
-                           state === 'finished' ? 'DONE' : 'IDLE'}
+                           state === 'error' ? 'ERROR' : 'DONE'}
                         </span>
                       )}
                       {isWeb && !isRunning && (
@@ -663,6 +662,16 @@ function AuthenticatedApp({ clientName, defaultCwd, onSignOut }: { clientName: s
                       <span className="session-user">{session.username ? session.username.split('_')[0] : 'unknown'}</span>
                       <span className="session-folder">{session.projectFolder.replace(/-/g, '/').slice(1).split('/').slice(-2).join('/')}</span>
                     </div>
+                    {session.stats && (
+                      <div className="session-stats">
+                        <span className="stat" title="Messages">{session.stats.messageCount} msgs</span>
+                        <span className="stat" title="Tool calls">{session.stats.toolCount} tools</span>
+                        {session.stats.agentCount > 0 && (
+                          <span className="stat agents" title="Agents spawned">{session.stats.agentCount} agents</span>
+                        )}
+                        <span className="stat cost" title="Estimated cost">${session.stats.estimatedCost.toFixed(2)}</span>
+                      </div>
+                    )}
                     {session.processInfo ? (
                       <div className="session-process-stats">
                         <span className="process-stat cpu">{session.processInfo.cpu.toFixed(1)}%</span>

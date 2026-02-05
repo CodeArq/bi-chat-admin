@@ -6,6 +6,7 @@
   --terminal-fg-dim: #00aa00;
   --terminal-accent: #00cc00;
   --terminal-user: #00ffff;
+  --terminal-cyan: #4ecdc4;
   --terminal-error: #ff4444;
   --terminal-border: #333333;
   --terminal-input-bg: #111111;
@@ -512,6 +513,12 @@ body {
   border: 1px solid rgba(0, 255, 65, 0.15);
 }
 
+.session-state-badge.done {
+  color: #00ff41;
+  background: rgba(0, 255, 65, 0.12);
+  border: 1px solid rgba(0, 255, 65, 0.3);
+}
+
 .session-state-badge.error {
   color: #ff4444;
   background: rgba(255, 68, 68, 0.08);
@@ -641,6 +648,31 @@ body {
 }
 
 /* ── Process Stats (active sessions) ── */
+
+/* Session Stats (msgs, tools, agents, cost) */
+.session-stats {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+  margin-right: 16px;
+}
+
+.session-stats .stat {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: #666;
+  white-space: nowrap;
+}
+
+.session-stats .stat.agents {
+  color: #ff44cc;
+}
+
+.session-stats .stat.cost {
+  color: #4ecdc4;
+  font-weight: 600;
+}
 
 .session-process-stats {
   display: flex;
@@ -963,36 +995,90 @@ body {
 }
 
 /* Tables in markdown */
+/* ── Markdown Tables ── */
 .message-content .table-wrapper {
   overflow-x: auto;
-  margin: 12px 0;
+  margin: 16px 0;
+  border-radius: 4px;
+  border: 1px solid #333;
 }
 
 .message-content table {
   width: 100%;
   border-collapse: collapse;
   font-size: 13px;
+  background: #0d0d0d;
 }
 
 .message-content table th,
 .message-content table td {
-  border: 1px solid var(--terminal-border);
-  padding: 8px 12px;
+  border: 1px solid #2a2a2a;
+  padding: 10px 14px;
   text-align: left;
+  vertical-align: top;
 }
 
 .message-content table th {
-  background: rgba(78, 205, 196, 0.15);
-  color: var(--terminal-cyan);
+  background: #1a2a28;
+  color: #4ecdc4;
   font-weight: 600;
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.5px;
 }
 
-.message-content table tr:nth-child(even) {
+.message-content table td {
+  color: #cccccc;
+}
+
+.message-content table tbody tr:nth-child(even) {
   background: rgba(255, 255, 255, 0.02);
 }
 
-.message-content table tr:hover {
-  background: rgba(78, 205, 196, 0.05);
+.message-content table tbody tr:hover {
+  background: rgba(78, 205, 196, 0.08);
+}
+
+.message-content table code {
+  background: #1a1a1a;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 12px;
+}
+
+/* ── JSON Viewer ── */
+.json-viewer {
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.json-viewer pre {
+  margin: 0 !important;
+}
+
+.json-expand-btn {
+  width: 100%;
+  padding: 8px 12px;
+  background: #151515;
+  border: none;
+  border-top: 1px solid #2a2a2a;
+  color: #4ecdc4;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.15s;
+}
+
+.json-expand-btn:hover {
+  background: #1a2a28;
+}
+
+.json-preview {
+  color: #666;
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-all;
 }
 
 /* Inline code */

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { DiffViewer } from './DiffViewer'
+import { JsonViewer } from './JsonViewer'
 
 interface ToolUseProps {
   type: 'use'
@@ -137,7 +138,7 @@ export function ToolBlock(props: ToolBlockProps) {
                 )}
               </div>
             ) : (
-              <pre>{JSON.stringify(input, null, 2)}</pre>
+              <JsonViewer data={input} maxPreviewLines={15} />
             )}
           </div>
         )}
@@ -151,9 +152,12 @@ export function ToolBlock(props: ToolBlockProps) {
   // Ensure output is a string (might be an object in some cases)
   const output = typeof rawOutput === 'string' ? rawOutput : JSON.stringify(rawOutput, null, 2)
 
-  // Truncate long outputs
+  // Check if output looks like JSON
+  const isJson = output.trim().startsWith('{') || output.trim().startsWith('[')
+
+  // For non-JSON, truncate long outputs
   const maxPreviewLength = 200
-  const shouldTruncate = output.length > maxPreviewLength
+  const shouldTruncate = !isJson && output.length > maxPreviewLength
   const preview = shouldTruncate ? output.slice(0, maxPreviewLength) + '...' : output
 
   return (
@@ -161,12 +165,20 @@ export function ToolBlock(props: ToolBlockProps) {
       <div className="tool-header" onClick={() => setIsExpanded(!isExpanded)}>
         <span className="tool-icon">{isError ? '❌' : '✅'}</span>
         <span className="tool-label">Result</span>
-        {shouldTruncate && (
+        {(shouldTruncate || isJson) && (
           <span className="tool-toggle">{isExpanded ? '▼' : '▶'}</span>
         )}
       </div>
       <div className="tool-content">
-        <pre>{isExpanded ? output : preview}</pre>
+        {isJson ? (
+          isExpanded ? (
+            <JsonViewer data={output} maxPreviewLines={20} />
+          ) : (
+            <pre className="json-preview">{output.slice(0, 150)}...</pre>
+          )
+        ) : (
+          <pre>{isExpanded ? output : preview}</pre>
+        )}
       </div>
     </div>
   )

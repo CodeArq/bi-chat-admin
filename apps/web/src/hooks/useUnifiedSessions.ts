@@ -8,6 +8,16 @@ export interface ProcessInfo {
   runtime: string
 }
 
+export interface SessionStats {
+  messageCount: number
+  toolCount: number
+  agentCount: number
+  inputTokens: number
+  outputTokens: number
+  cacheTokens: number
+  estimatedCost: number
+}
+
 export interface UnifiedSession {
   sessionId: string
   label?: string
@@ -17,6 +27,7 @@ export interface UnifiedSession {
   sizeBytes: number
   processInfo?: ProcessInfo
   username?: string  // Linux user who owns this session
+  stats?: SessionStats  // Quick stats from JSONL scan
 }
 
 export interface SessionUsage {
@@ -45,9 +56,11 @@ export function useUnifiedSessions() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const fetchSessions = useCallback(async (cwd?: string) => {
+  const fetchSessions = useCallback(async (cwd?: string, isBackgroundRefresh = false) => {
     try {
-      setLoading(true)
+      // Only show loading on initial fetch, not background refreshes
+      if (!isBackgroundRefresh) setLoading(true)
+
       let url = '/sessions'
       if (cwd) url += '?cwd=' + encodeURIComponent(cwd)
 
@@ -61,7 +74,7 @@ export function useUnifiedSessions() {
       console.error('[useUnifiedSessions] Error:', err)
       setError(err.message)
     } finally {
-      setLoading(false)
+      if (!isBackgroundRefresh) setLoading(false)
     }
   }, [fetchWithAuth])
 
@@ -136,7 +149,8 @@ export function useUnifiedSessions() {
   }, [fetchSessions])
 
   useEffect(() => {
-    const interval = setInterval(() => fetchSessions(), 10000)
+    // Background refresh - don't show loading indicator
+    const interval = setInterval(() => fetchSessions(undefined, true), 10000)
     return () => clearInterval(interval)
   }, [fetchSessions])
 
