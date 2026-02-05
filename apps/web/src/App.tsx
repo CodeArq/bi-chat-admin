@@ -664,26 +664,36 @@ function AuthenticatedApp({ clientName, defaultCwd, onSignOut }: { clientName: s
                     </div>
                     {session.stats && (
                       <div className="session-stats">
-                        <span className="stat" title="Messages">{session.stats.messageCount} msgs</span>
-                        <span className="stat" title="Tool calls">{session.stats.toolCount} tools</span>
+                        <span className="stat-group">
+                          <span className="stat-value">{session.stats.messageCount}</span>
+                          <span className="stat-label">msgs</span>
+                        </span>
+                        <span className="stat-group">
+                          <span className="stat-value">{session.stats.toolCount}</span>
+                          <span className="stat-label">tools</span>
+                        </span>
                         {session.stats.agentCount > 0 && (
-                          <span className="stat agents" title="Agents spawned">{session.stats.agentCount} agents</span>
+                          <span className="stat-group agents">
+                            <span className="stat-value">{session.stats.agentCount}</span>
+                            <span className="stat-label">agents</span>
+                          </span>
                         )}
-                        <span className="stat cost" title="Estimated cost">${session.stats.estimatedCost.toFixed(2)}</span>
+                        <span className="stat-group cost">
+                          <span className="stat-value">${session.stats.estimatedCost.toFixed(2)}</span>
+                        </span>
                       </div>
                     )}
-                    {session.processInfo ? (
-                      <div className="session-process-stats">
-                        <span className="process-stat cpu">{session.processInfo.cpu.toFixed(1)}%</span>
-                        <span className="process-stat mem">{session.processInfo.memoryMB} MB</span>
-                        <span className="process-stat runtime">{session.processInfo.runtime}</span>
-                      </div>
-                    ) : (
-                      <div className="session-meta-right">
-                        <span className="session-time">{timeAgo(session.lastModified)}</span>
+                    <div className="session-meta-right">
+                      <span className="session-time">{timeAgo(session.lastModified)}</span>
+                      {session.processInfo ? (
+                        <>
+                          <span className="process-stat cpu">{session.processInfo.cpu.toFixed(1)}%</span>
+                          <span className="process-stat mem">{session.processInfo.memoryMB} MB</span>
+                        </>
+                      ) : (
                         <span className="session-size">{formatSize(session.sizeBytes)}</span>
-                      </div>
-                    )}
+                      )}
+                    </div>
                     <div className="session-actions">
                       {isWeb && isRunning && (
                         <button
