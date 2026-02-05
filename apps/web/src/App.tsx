@@ -189,12 +189,42 @@ function AuthenticatedApp({ clientName, defaultCwd, onSignOut }: { clientName: s
     if (data.process_state) {
       // Track state for all chats (dashboard display)
       setChatStates(prev => new Map(prev).set(data.chat_id, data.process_state!))
-      // Also set active session state
-      if (v2ChatId && data.chat_id === v2ChatId) {
-        setProcessState(data.process_state)
+    }
+  }, [])
+
+  // Sync processState when v2ChatId changes or chatStates updates
+  useEffect(() => {
+    if (v2ChatId) {
+      const state = chatStates.get(v2ChatId)
+      if (state) {
+        setProcessState(state)
       }
     }
-  }, [v2ChatId])
+  }, [v2ChatId, chatStates])
+
+  // Sync chatStates from webChats API data (ensures dashboard shows state even without WebSocket)
+  // API polls every 3s; WebSocket events will override with more real-time updates when active
+  useEffect(() => {
+    if (webChats.length > 0) {
+      setChatStates(prev => {
+        const newMap = new Map(prev)
+        let changed = false
+        for (const chat of webChats) {
+          if (chat.process_state) {
+            const existing = prev.get(chat.id)
+            // Update if no existing state OR if API says idle/finished (process ended)
+            if (!existing || chat.process_state === 'idle' || chat.process_state === 'finished') {
+              if (existing !== chat.process_state) {
+                newMap.set(chat.id, chat.process_state)
+                changed = true
+              }
+            }
+          }
+        }
+        return changed ? newMap : prev
+      })
+    }
+  }, [webChats])
 
   const { isConnected } = useWebSocket({
     onTranscriptEntry: handleTranscriptEntry,
@@ -287,7 +317,8 @@ function AuthenticatedApp({ clientName, defaultCwd, onSignOut }: { clientName: s
       setIsV2Mode(true)
       setV2ChatId(webChat.id)
       setRespondedApprovals(new Map())
-      setProcessState(chatStates.get(webChat.id))
+      // Initialize process state from chatStates (WebSocket) or chat object (API)
+      setProcessState(chatStates.get(webChat.id) || webChat.process_state)
 
       // Fetch any pending approvals and inject them into the transcript
       const pendingApprovals = await getPendingApprovals(webChat.id)
